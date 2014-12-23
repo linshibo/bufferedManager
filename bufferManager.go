@@ -4,8 +4,12 @@ package bufferedManager
 //"sync"
 //)
 
+const (
+	MaxBucket = 2048
+)
+
 type Token struct {
-	base [2048]byte
+	base  []byte
 	Data  []byte
 	owner chan<- *Token
 }
@@ -17,13 +21,14 @@ func (t *Token) Return() {
 
 type BufferManager struct {
 	buffer chan *Token
+	resource []byte
 }
 
 func NewBufferManager(size int) *BufferManager {
-	buffer := make(chan *Token, size)
-	ret := &BufferManager{buffer}
+	ret := &BufferManager{buffer:make(chan *Token, size)}
+	ret.resource=make([]byte,size*MaxBucket)
 	for i := 0; i < size; i++ {
-		buffer <- &Token{owner: buffer}
+		ret.buffer <- &Token{owner: ret.buffer, base:ret.resource[i*MaxBucket:(i+1)*MaxBucket]}
 	}
 	return ret
 }
