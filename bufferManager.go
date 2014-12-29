@@ -15,8 +15,10 @@ type Token struct {
 }
 
 func (t *Token) Return() {
-	t.Data = nil
-	t.owner <- t
+	if t.owner != nil {
+		t.Data = nil
+		t.owner <- t
+	}
 }
 
 type BufferManager struct {
@@ -34,7 +36,13 @@ func NewBufferManager(size int) *BufferManager {
 }
 
 func (b *BufferManager) GetToken(size int) *Token {
-	t := <-b.buffer
+	var t *Token 
+	select{
+	case t = <-b.buffer:
+	default :
+		t = new(Token)
+		t.base= make([]byte, size)
+	}
 	t.Data = t.base[:size]
 	return t
 }
