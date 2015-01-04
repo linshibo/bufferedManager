@@ -5,7 +5,7 @@ package bufferedManager
 //)
 
 const (
-	MaxBucket = 2048
+	MaxBucket = 1024*4
 )
 
 type Token struct {
