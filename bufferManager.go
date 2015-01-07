@@ -1,8 +1,8 @@
 package bufferedManager
 
-const (
-	MaxBucket  = 1024
-)
+//const (
+//MaxBucket  = 1024
+//)
 
 type Token struct {
 	base  []byte
@@ -20,11 +20,13 @@ func (t *Token) Return() {
 type BufferManager struct {
 	buffer   chan *Token
 	resource []byte
+	MaxBucket int
 }
 
-func NewBufferManager(size int) *BufferManager {
+func NewBufferManager(size int, MaxBucket int) *BufferManager {
 	ret := &BufferManager{buffer: make(chan *Token, size)}
 	ret.resource = make([]byte, size*MaxBucket)
+	ret.MaxBucket=MaxBucket
 	for i := 0; i < size; i++ {
 		ret.buffer <- &Token{owner: ret.buffer, base: ret.resource[i*MaxBucket : (i+1)*MaxBucket]}
 	}
@@ -33,7 +35,7 @@ func NewBufferManager(size int) *BufferManager {
 
 func (b *BufferManager) GetToken(size int) *Token {
 	var t *Token
-	if size > MaxBucket {
+	if size > b.MaxBucket {
 		t = new(Token)
 		t.base = make([]byte, size)
 	} else {
